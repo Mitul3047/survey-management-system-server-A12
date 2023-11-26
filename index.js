@@ -75,13 +75,25 @@ async function run() {
     //   const result = await userCollection.insertOne(user);
     //   res.send(result)
     // })
-
+    // admin
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
-          role: 'admin'
+          admin: true
+        }
+      }
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+    // Surveyor
+    app.patch('/users/surveyor/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          surveyor: true
         }
       }
       const result = await userCollection.updateOne(filter, updatedDoc);
