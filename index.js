@@ -117,10 +117,24 @@ async function run() {
 
     app.get('/surveys/:id', async (req, res) => {
       const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await surveyCollection.findOne(query)
+      res.send(result)
+  })
+
+    app.delete('/surveys/:id', async (req, res) => {
+      const id = req.params.id;
       const query = { _id: new ObjectId(id) }
-      const result = await surveyCollection.findOne(query);
+      const result = await surveyCollection.deleteOne(query);
       res.send(result);
     })
+
+    // app.get('/surveys/:id', async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) }
+    //   const result = await surveyCollection.findOne(query);
+    //   res.send(result);
+    // })
 
     app.post('/surveys', async (req, res) => {
       const item = req.body;
