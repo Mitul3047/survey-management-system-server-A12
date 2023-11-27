@@ -181,6 +181,12 @@ async function run() {
 
     // vote 
 
+
+    app.get('/vote', async (req, res) => {
+      const result = await voteCollection.find().toArray();
+      res.send(result);
+    });
+
     app.post('/vote', async (req, res) => {
       const item = req.body;
       const result = await voteCollection.insertOne(item);
