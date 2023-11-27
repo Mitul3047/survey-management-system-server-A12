@@ -5,7 +5,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // const jwt = require('jsonwebtoken');
 // @ terminal node > require('crypto').randomBytes(64).toString('hex')
 require('dotenv').config()
-// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 3000; // Use process.env.PORT or default to 3000
 
@@ -32,15 +32,25 @@ async function run() {
     const userCollection = client.db("surveyDb").collection("users");
     const reviewCollection = client.db("surveyDb").collection("reviews");
     const surveyCollection = client.db("surveyDb").collection("survey");
-
+    const voteCollection = client.db("surveyDb").collection("vote");
+    const paymentCollection = client.db("surveyDb").collection("payments");
 
 
     // users related api
+
+
     app.get('/users', async (req, res) => {
       // console.log(req.headers);
       const result = await userCollection.find().toArray();
       res.send(result);
     });
+
+    app.get('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await userCollection.findOne(query)
+      res.send(result)
+    })
 
     app.get('/users/admin/:email', async (req, res) => {
       const email = req.params.email;
@@ -75,7 +85,11 @@ async function run() {
     //   const result = await userCollection.insertOne(user);
     //   res.send(result)
     // })
-    // admin
+
+
+    //  user = admin
+
+
     app.patch('/users/admin/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -87,13 +101,33 @@ async function run() {
       const result = await userCollection.updateOne(filter, updatedDoc);
       res.send(result);
     })
-    // Surveyor
+
+
+    // user =Surveyor
+
+
     app.patch('/users/surveyor/:id', async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
           surveyor: true
+        }
+      }
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+
+    // user = proUser
+
+
+    app.patch('/users/prouser/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          proUser: true
         }
       }
       const result = await userCollection.updateOne(filter, updatedDoc);
@@ -107,6 +141,7 @@ async function run() {
       res.send(result);
     })
 
+
     // survey
 
 
@@ -117,10 +152,10 @@ async function run() {
 
     app.get('/surveys/:id', async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await surveyCollection.findOne(query)
       res.send(result)
-  })
+    })
 
     app.delete('/surveys/:id', async (req, res) => {
       const id = req.params.id;
@@ -142,15 +177,30 @@ async function run() {
       res.send(result);
     });
 
+
+
+    // vote 
+
+    app.post('/vote', async (req, res) => {
+      const item = req.body;
+      const result = await voteCollection.insertOne(item);
+      res.send(result);
+    });
+
     // reviews
+
+
     app.get('/reviews', async (req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     })
 
-// payments
 
-   // payment intent
+    // payments
+
+
+    // payment intent
+
     app.post('/create-payment-intent', async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
@@ -167,6 +217,38 @@ async function run() {
       })
     });
 
+
+    app.get('/payments/:email', async (req, res) => {
+      const query = { email: req.params.email }
+      console.log('eamial', email);
+      if (req.params.email !== req.decoded.email) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
+      const result = await paymentCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    // app.post('/payments', async (req, res) => {
+    //   const payment = req.body;
+    //   const paymentResult = await paymentCollection.insertOne(payment);
+
+    //   //  carefully delete each item from the cart
+    //   console.log('payment info', payment);
+    //   const query = {
+    //     _id: {
+    //       $in: payment.cartIds.map(id => new ObjectId(id))
+    //     }
+    //   };
+
+    //   const deleteResult = await cartCollection.deleteMany(query);
+
+    //   res.send({ paymentResult, deleteResult });
+    // })
+    app.post('/payments', async (req, res) => {
+      const item = req.body;
+      const result = await paymentCollection.insertOne(item);
+      res.send(result);
+    });
 
 
     // Send a ping to confirm a successful connection
