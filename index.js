@@ -192,7 +192,7 @@ async function run() {
     // user = proUser
 
 
-    app.patch('/users/prouser/:id', async (req, res) => {
+    app.patch('/users/prouser/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
@@ -227,7 +227,7 @@ async function run() {
       res.send(result)
     })
 
-    app.patch('/surveys/:id', async (req, res) => {
+    app.patch('/surveys/:id',verifyToken,verifySurveyor, async (req, res) => {
       const item = req.body;
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) }
