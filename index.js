@@ -227,7 +227,7 @@ async function run() {
       res.send(result)
     })
 
-    app.patch('/surveys/:id',verifyToken,verifySurveyor, async (req, res) => {
+    app.patch('/surveys/:id',verifyToken, async (req, res) => {
       const item = req.body;
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) }
